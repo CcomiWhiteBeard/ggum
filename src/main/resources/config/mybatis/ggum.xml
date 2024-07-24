@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ggum">	
+
+	<select id="selectAll" resultType="net.hb.ggum.GGumDTO">
+		select p.*, m.profile_img, coalesce(rc.cnt, 0) as rcnt
+		from ggum_post p
+		join ggum_member m 
+		on p.id = m.id
+		left join (
+    		select post_idx, count(*) as cnt
+    		from ggum_reply
+    		group by post_idx
+		) rc 
+		on p.post_idx = rc.post_idx
+		order by p.post_idx desc
+	</select>
+	
+	<select id="selectId" resultType="int">
+		select count(*) as cnt from ggum_member 
+		where id = #{id} and pw = #{pw}
+	</select>
+	
+	<select id="checkId" resultType="int">
+		select count(*) as cnt from ggum_member 
+		where id = #{id}
+	</select>
+	
+	<select id="selectMy" parameterType="net.hb.ggum.GGumDTO" resultType="net.hb.ggum.GGumDTO">
+		select * from ggum_post
+		where id = #{id}
+		order by post_idx desc
+	</select>
+	
+	<select id="selectPost" parameterType="int" resultType="net.hb.ggum.GGumDTO">
+		select * from ggum_post 
+		where post_idx = #{idx}
+	</select>
+	
+	<select id="selectReply" parameterType="int" resultType="net.hb.ggum.GGumDTO">
+		select * from ggum_reply 
+		where post_idx = #{idx}
+		order by reply_idx asc
+	</select>
+	
+	<insert id="insertPost" parameterType="net.hb.ggum.GGumDTO">
+	   insert into ggum_post
+	   values( ggum_post_seq.nextval, #{post_img}, #{id}, #{title} )
+	</insert>
+	
+	<insert id="insertMember" parameterType="net.hb.ggum.GGumDTO">
+	   insert into ggum_member
+	   values( #{id}, #{pw}, #{profile_img} )
+	</insert>
+	
+	<insert id="insertReply" parameterType="net.hb.ggum.GGumDTO">
+	   insert into ggum_reply
+	   values( ggum_reply_seq.nextval, #{content}, #{post_idx}, #{id} )
+	</insert>
+	
+	<delete id="delete" parameterType="int">
+		delete from ggum_post where post_idx = #{idx}
+	</delete>
+	
+	<delete id="deleteReply" parameterType="int">
+		delete from ggum_reply where reply_idx = #{idx}
+	</delete>
+	
+	<update id="update" parameterType="net.hb.ggum.GGumDTO">
+		update ggum_post set title = #{title} 
+		where post_idx = #{post_idx}
+	</update>
+	
+</mapper>
+
+
+
+
+
+
+
